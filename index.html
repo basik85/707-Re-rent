@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midwest District Re-Rent Request</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MW Re-Rent">
+<meta name="theme-color" content="#00B0F0">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2300B0F0%22 rx=%2220%22/><text y=%2268%22 x=%2250%22 font-family=%22Arial,sans-serif%22 font-size=%2255%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>RR</text></svg>">
+
+<style>
+  :root {
+    --blue: #00B0F0;
+    --yellow: #FFFDE7;
+    --yellow-border: #E6C200;
+    --green: #92D050;
+    --green-bg: #F1F8E9;
+    --good: #1B5E20;
+    --bad: #B71C1C;
+    --ink: #1a1a1a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Calibri, Arial, sans-serif;
+    color: var(--ink);
+    background: #f0f2f5;
+    margin: 0;
+    padding: 24px 12px;
+  }
+  /* PWA safe area adaptation for newer iOS devices */
+  @supports (padding: env(safe-area-inset-top)) {
+    body {
+      padding-top: calc(12px + env(safe-area-inset-top));
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+  }
+  .form-card {
+    max-width: 820px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  header {
+    background: var(--blue);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  header h1 { margin: 0; font-size: 22px; }
+  .toolbar button {
+    border: none; border-radius: 6px; padding: 8px 14px;
+    font-size: 14px; font-weight: bold; cursor: pointer;
+    background: #fff; color: #006a91; margin-left: 8px;
+  }
+  .toolbar button:hover { background: #e6f7ff; }
+  main { padding: 20px 24px 28px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px 1fr;
+    gap: 10px 16px;
+    margin-bottom: 22px;
+  }
+  .grid label { font-weight: bold; font-size: 14px; align-self: center; }
+  input, select {
+    font: inherit; font-size: 14px;
+    padding: 7px 9px;
+    border: 1px solid var(--yellow-border);
+    background: var(--yellow);
+    border-radius: 5px;
+    width: 100%;
+  }
+  input:focus, select:focus { outline: 2px solid var(--blue); background: #fff; }
+
+  textarea {
+    font: inherit; font-size: 14px;
+    padding: 7px 9px;
+    border: 1px solid var(--yellow-border);
+    background: var(--yellow);
+    border-radius: 5px;
+    width: 100%;
+    display: block;
+    resize: vertical;
+    min-height: 64px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  textarea:focus { outline: 2px solid var(--blue); background: #fff; }
+
+  h2 {
+    font-size: 15px; margin: 0 0 8px;
+    border-bottom: 2px solid var(--blue); padding-bottom: 4px;
+    color: #006a91; text-transform: uppercase; letter-spacing: .5px;
+  }
+  h3 { font-size: 13px; margin: 20px 0 6px; color: #006a91; font-weight: bold; text-transform: uppercase; letter-spacing: .3px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  th, td { border: 1px solid #ccc; padding: 8px 10px; font-size: 14px; text-align: right; }
+  th { background: #eef6fb; }
+  td:first-child, th:first-child { text-align: left; font-weight: bold; width: 240px; }
+  td input { text-align: right; }
+  tr.calc td { background: var(--green-bg); font-weight: bold; }
+  tr.calc td:first-child { background: var(--green); }
+  .margin-good { color: var(--good); }
+  .margin-warn { color: #8a6500; }
+  .margin-bad  { color: var(--bad); }
+  tr.calc td.margin-good { color: var(--good); }
+  tr.calc td.margin-warn { color: #8a6500; background: #FFF3CD; }
+  tr.calc td.margin-bad  { color: var(--bad); background: #FAD4D4; }
+
+  .approval {
+    background: #FAD4D4;
+    border: 1px solid var(--bad);
+    border-left: 5px solid var(--bad);
+    color: #7a0000;
+    padding: 11px 14px; border-radius: 6px;
+    font-size: 13.5px; margin-bottom: 18px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .approval.none { display: none; }
+  .target-note { font-size: 12.5px; color: #555; margin: -2px 0 14px; }
+  .target-warn {
+    border-color: var(--bad) !important;
+    background: #fff0f0 !important;
+    color: var(--bad);
+    font-weight: bold;
+  }
+  .table-wrap.approval-mode {
+    border: 2px solid var(--bad);
+    border-radius: 6px;
+    padding: 4px;
+  }
+  .caution {
+    background: #FFF8E1;
+    border: 1px solid var(--yellow-border);
+    border-left: 5px solid var(--yellow-border);
+    color: #7a5a00;
+    padding: 11px 14px; border-radius: 6px;
+    font-size: 13.5px; margin-bottom: 18px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .caution.none { display: none; }
+  .target-caution {
+    border-color: var(--yellow-border) !important;
+    background: #FFF8E1 !important;
+    color: #8a6500;
+    font-weight: bold;
+  }
+  .table-wrap.caution-mode {
+    border: 2px solid var(--yellow-border);
+    border-radius: 6px;
+    padding: 4px;
+  }
+  .target-wrap { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-weight:bold; font-size:14px; }
+  .target-wrap input { width: 70px; text-align: right; }
+
+  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 18px; }
+  .table-wrap table { margin-bottom: 0; min-width: 460px; }
+
+  .reco {
+    background: var(--green-bg);
+    border-left: 4px solid var(--green);
+    padding: 10px 14px; border-radius: 6px;
+    font-size: 13.5px; margin-bottom: 18px;
+  }
+  .reco.warn { background: #fff4f4; border-left-color: var(--bad); }
+  .reco.none { display: none; }
+
+  .field-error { border-color: var(--bad) !important; background: #fff0f0 !important; }
+
+  #itemsTable, #markupTable { min-width: 700px; }
+  #itemsTable th, #itemsTable td, #markupTable th, #markupTable td { text-align: left; width: auto; font-weight: normal; vertical-align: middle; }
+  #itemsTable th, #markupTable th { font-weight: bold; }
+  #itemsTable th.num, #itemsTable td.num, #markupTable th.num, #markupTable td.num { text-align: right; }
+  #itemsTable th.mid, #itemsTable td.mid, #markupTable th.mid, #markupTable td.mid { text-align: center; width: 60px; }
+  #itemsTable input { width: 100%; }
+  #itemsTable .it-cost-d, #itemsTable .it-cost-w, #itemsTable .it-cost-m { text-align: right; }
+  #itemsTable .it-qty { text-align: center; }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+  #customTable { min-width: 700px; }
+  #customTable th, #customTable td { text-align: left; width: auto; font-weight: normal; vertical-align: middle; }
+  #customTable th { font-weight: bold; }
+  #customTable th.num, #customTable td.num { text-align: right; }
+  #customTable th.mid, #customTable td.mid { text-align: center; width: 60px; }
+  #customTable input { width: 100%; text-align: right; }
+  #customTable input.under { background: #FAD4D4; border-color: var(--bad); color: var(--bad); font-weight: bold; }
+
+  .custom-section { margin: 6px 0 18px; }
+  .custom-toggle {
+    width: 100%; text-align: left; cursor: pointer;
+    background: #eef6fb; border: 1px solid #bcdff0; border-radius: 6px;
+    padding: 9px 12px; font: inherit; font-size: 13px; font-weight: bold;
+    color: #006a91; text-transform: uppercase; letter-spacing: .3px;
+  }
+  .custom-toggle:hover { background: #e0f0fa; }
+  .custom-toggle .caret { display: inline-block; width: 14px; }
+  .custom-body { padding-top: 12px; }
+  .custom-body.none { display: none; }
+  .custom-body-pwa { margin: 0 0 10px; }
+  .custom-desc { font-size: 12.5px; color: #555; margin: 0 0 10px; }
+  #markupTable td.mu { background: var(--green-bg); font-weight: bold; white-space: nowrap; }
+  #markupTable td.mu.margin-warn { background: #FFF3CD; color: #8a6500; }
+  #markupTable td.mu.margin-bad  { background: #FAD4D4; color: var(--bad); }
+  #markupTable td.mu.margin-good { color: var(--good); }
+  .row-x { border: none; background: transparent; cursor: pointer; font-size: 17px; line-height: 1; color: #999; padding: 2px 6px; }
+  .row-x:hover { color: var(--bad); }
+  .add-btn { margin: 0 0 18px; }
+
+  .totals {
+    border: 1px solid var(--green); background: var(--green-bg);
+    border-radius: 8px; padding: 10px 16px; margin: 0 0 18px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .totals .t-row { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; font-size: 14px; }
+  .totals .t-row.headline { font-size: 16px; border-top: 1px solid #cfe3b8; margin-top: 5px; padding-top: 8px; }
+  .totals .t-row.headline b { color: #006a91; }
+  .totals.tier-yellow { border-color: var(--yellow-border); background: #FFF8E1; }
+  .totals.tier-yellow .t-row.headline b { color: #8a6500; }
+  .totals.tier-red { border-color: var(--bad); background: #FAD4D4; }
+  .totals.tier-red .t-row.headline b { color: var(--bad); }
+
+  .vendor-field { display: flex; gap: 6px; align-items: center; grid-column: 2 / -1; }
+  .vendor-combo { position: relative; flex: 0 0 auto; width: calc(35ch + 22px); max-width: 100%; }
+  .vendor-combo input { width: 100%; }
+  .mini {
+    border: 1px solid var(--blue); background: #e6f7ff; color: #006a91;
+    border-radius: 5px; padding: 0 12px; font: inherit; font-size: 13px;
+    font-weight: bold; cursor: pointer; white-space: nowrap;
+  }
+  .mini:hover { background: #cdeeff; }
+
+  .vendor-drop {
+    position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 30;
+    background: #fff; border: 1px solid var(--yellow-border); border-radius: 5px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.18); max-height: 220px; overflow-y: auto;
+  }
+  .vendor-drop.none { display: none; }
+  .vendor-opt { display: flex; align-items: center; }
+  .vendor-opt + .vendor-opt { border-top: 1px solid #eee; }
+  .vendor-opt .v-name {
+    flex: 1 1 auto; text-align: left; border: none; background: transparent;
+    font: inherit; font-size: 14px; padding: 8px 10px; cursor: pointer; color: var(--ink);
+  }
+  .vendor-opt .v-name:hover { background: #eef6fb; }
+  .vendor-opt .v-x {
+    border: none; background: transparent; cursor: pointer; color: #999;
+    font-size: 16px; line-height: 1; padding: 6px 10px;
+  }
+  .vendor-opt .v-x:hover { color: var(--bad); }
+  .vendor-drop-empty { padding: 9px 10px; color: #888; font-size: 13px; }
+
+  .hint { font-size: 12.5px; color: #555; margin: 4px 0 18px; }
+  footer { font-size: 12px; color: #777; padding: 0 24px 18px; max-width: 820px; margin: 0 auto; }
+
+  @media (max-width: 640px) {
+    body { padding: 12px 6px; }
+    main { padding: 16px 14px 22px; }
+    header { padding: 14px 16px; }
+    header h1 { font-size: 18px; }
+    .toolbar { display: flex; flex-wrap: wrap; width: 100%; }
+    .toolbar button { margin: 6px 6px 0 0; flex: 1 1 auto; }
+    .grid { grid-template-columns: 1fr; gap: 2px 0; }
+    .grid label { align-self: start; margin-top: 10px; }
+    .vendor-field { grid-column: 1 / -1; }
+    .vendor-combo { width: 100%; }
+    th, td { padding: 6px; font-size: 13px; }
+    td:first-child, th:first-child { width: auto; }
+  }
+
+  body.pdf-mode .toolbar, body.pdf-mode .hint, body.pdf-mode footer { display: none; }
+  body.pdf-mode .form-card { box-shadow: none; border-radius: 0; max-width: none; width: 100%; }
+  body.pdf-mode .table-wrap { overflow: visible; border: none; padding: 0; }
+  body.pdf-mode #itemsTable, body.pdf-mode #markupTable, body.pdf-mode #customTable { min-width: 0; width: 100%; }
+  body.pdf-mode table { font-size: 11px; }
+  body.pdf-mode th, body.pdf-mode td { padding: 4px 5px; }
+  body.pdf-mode th.mid, body.pdf-mode td.mid,
+  body.pdf-mode #customTable th:first-child, body.pdf-mode #customTable td:first-child,
+  body.pdf-mode td:first-child, body.pdf-mode th:first-child { width: auto; }
+  body.pdf-mode input, body.pdf-mode select, body.pdf-mode textarea { border: 1px solid #ddd; }
+
+  /* Compact everything vertically so the whole form fits on one page */
+  body.pdf-mode { font-size: 11px; }
+  body.pdf-mode main { padding: 8px 14px 10px; }
+  body.pdf-mode header { padding: 8px 14px; }
+  body.pdf-mode header h1 { font-size: 16px; }
+  body.pdf-mode h2 { font-size: 13px; margin: 7px 0 4px; padding-bottom: 2px; }
+  body.pdf-mode h3 { font-size: 11.5px; margin: 6px 0 3px; }
+  body.pdf-mode .grid { gap: 3px 12px; margin-bottom: 4px; }
+  body.pdf-mode label { font-size: 9px; margin-bottom: 0; }
+  body.pdf-mode input, body.pdf-mode select { padding: 2px 5px; font-size: 10px; }
+  body.pdf-mode table { font-size: 9.5px; }
+  body.pdf-mode th, body.pdf-mode td { padding: 1px 4px; line-height: 1.25; }
+  body.pdf-mode .target-note { font-size: 8.5px; margin: 2px 0 0; }
+  body.pdf-mode .totals { padding: 4px 12px; margin: 0 0 6px; }
+  body.pdf-mode .totals .t-row { padding: 0; font-size: 11px; }
+  body.pdf-mode .banner, body.pdf-mode #approval, body.pdf-mode #customApproval { padding: 4px 7px; font-size: 9.5px; margin: 4px 0; }
+  body.pdf-mode .reason-wrap textarea, body.pdf-mode #reason { font-size: 10px; padding: 3px 5px; min-height: 0; }
+  body.pdf-mode .custom-toggle { font-size: 10px; padding: 4px 7px; margin: 4px 0; }
+  body.pdf-mode .add-btn, body.pdf-mode .row-x { display: none; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .form-card { box-shadow: none; border-radius: 0; max-width: none; }
+    .toolbar, .hint, footer { display: none; }
+    input, select, textarea { border: 1px solid #ddd; background: transparent; padding: 2px; }
+    .table-wrap { overflow: visible; border: none; padding: 0; }
+    #itemsTable, #markupTable, #customTable { min-width: 0; width: 100%; }
+    table { font-size: 11px; }
+    th, td { padding: 4px 5px; }
+    tr { page-break-inside: avoid; }
+    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.calc td:first-child, th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="form-card">
+  <header>
+    <h1>Midwest District Re-Rent Request</h1>
+    <div class="toolbar">
+      <button onclick="emailRequest()">Email Request</button>
+      <button onclick="savePdf()">Download PDF</button>
+      <button onclick="resetForm()">Clear Form</button>
+    </div>
+  </header>
+  <main>
+    <div class="grid">
+      <label for="branch">Branch Name</label>      <input id="branch" data-save>
+      <label for="osr">OSR</label>                 <input id="osr" data-save>
+      <label for="customer">Customer Name</label>  <input id="customer" data-save>
+      <label for="account">Account Number</label>  <input id="account" data-save>
+      <label for="startdate">Re-Rent Start Date</label>  <input id="startdate" type="date" data-save>
+      <label for="length">Length of Re-Rent</label><input id="length" placeholder="e.g. 2 Weeks" data-save>
+      <label for="distavail">District Availability</label> <input id="distavail" data-save>
+      <label for="regavail">Region Availability</label>    <input id="regavail" data-save>
+      <label for="vendor">Re-Rent Vendor</label>
+      <div class="vendor-field">
+        <span class="vendor-combo">
+          <input id="vendor" size="35" autocomplete="off" data-save>
+          <div id="vendorDrop" class="vendor-drop none"></div>
+        </span>
+        <button type="button" class="mini" onclick="addCurrentVendor()" title="Save this vendor to your list">Save</button>
+      </div>
+    </div>
+
+    <h2>Reason for Re-Rent</h2>
+    <textarea id="reason" rows="3" data-save
+      placeholder="Briefly explain why this re-rent is needed — e.g. emergency / machine down, fleet not available in district or region, customer deadline, etc."></textarea>
+
+    <h2>Pricing &amp; Margin</h2>
+    <div class="target-wrap">
+      <label for="target">Target Margin %</label>
+      <input id="target" type="number" min="0" max="99" step="1" value="30" inputmode="numeric" data-save>
+    </div>
+    <div class="target-note">Midwest (MW) District target margin is <b>30%</b>. Anything below <b>30% margin</b> must be approved by DSM or DM.</div>
+
+    <h3>Equipment List — Re-Rent Cost</h3>
+    <div class="table-wrap">
+    <table id="itemsTable">
+      <thead>
+        <tr>
+          <th>Cat Class</th>
+          <th>Equipment Description</th>
+          <th class="mid">Qty</th>
+          <th class="num">Day Cost (each)</th>
+          <th class="num">Week Cost (each)</th>
+          <th class="num">Month Cost (each)</th>
+          <th class="mid"></th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody"></tbody>
+    </table>
+    </div>
+    <button type="button" class="mini add-btn" onclick="addItem()">+ Add Equipment</button>
+
+    <h3>Charge to Customer (Target Margin)</h3>
+    <div class="table-wrap">
+    <table id="markupTable">
+      <thead>
+        <tr>
+          <th>Equipment</th>
+          <th class="mid">Qty</th>
+          <th class="num">Day Charge (each)</th>
+          <th class="num">Week Charge (each)</th>
+          <th class="num">Month Charge (each)</th>
+        </tr>
+      </thead>
+      <tbody id="markupBody"></tbody>
+      <tfoot>
+        <tr class="calc">
+          <td colspan="2">Total Charge to Customer (× Qty)</td>
+          <td class="num" id="totD">$0.00</td>
+          <td class="num" id="totW">$0.00</td>
+          <td class="num" id="totM">$0.00</td>
+        </tr>
+        <tr class="calc">
+          <td colspan="2">United Rentals Profit (× Qty) — vs Vendor Cost</td>
+          <td class="num" id="proD">$0.00</td>
+          <td class="num" id="proW">$0.00</td>
+          <td class="num" id="proM">$0.00</td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+
+    <div id="approval" class="approval none"></div>
+
+    <div class="custom-section">
+      <button type="button" class="custom-toggle" id="customToggle" onclick="toggleCustom()" aria-expanded="false">
+        <span class="caret">&#9656;</span> Custom Rental Charge to Customer (optional)
+      </button>
+      <div id="customBody" class="custom-body none">
+        <p class="custom-desc">Enter the Day / Week / Month charge you actually billed the customer for each piece, to bypass
+          the target-margin markup. The margin and UR profit are calculated against the Re-Rent Cost from the Equipment List
+          above. Rows mirror the Equipment List — add or remove pieces there.</p>
+        <div class="table-wrap">
+        <table id="customTable">
+          <thead>
+            <tr>
+              <th>Equipment</th>
+              <th class="mid">Qty</th>
+              <th class="num">Day Charge (each)</th>
+              <th class="num">Week Charge (each)</th>
+              <th class="num">Month Charge (each)</th>
+            </tr>
+          </thead>
+          <tbody id="customRows"></tbody>
+          <tfoot>
+            <tr class="calc">
+              <td colspan="2">Total Custom Charge (× Qty)</td>
+              <td class="num" id="cTotD">$0.00</td><td class="num" id="cTotW">$0.00</td><td class="num" id="cTotM">$0.00</td>
+            </tr>
+            <tr class="calc">
+              <td colspan="2">Custom Margin %</td>
+              <td class="num" id="cMarD">—</td><td class="num" id="cMarW">—</td><td class="num" id="cMarM">—</td>
+            </tr>
+            <tr class="calc">
+              <td colspan="2">UR Profit (× Qty) — vs Vendor Cost</td>
+              <td class="num" id="cProD">$0.00</td><td class="num" id="cProW">$0.00</td><td class="num" id="cProM">$0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+        </div>
+        <div id="customApproval" class="approval none"></div>
+      </div>
+    </div>
+
+    <p class="hint">
+      In the <b>Equipment List</b>, add each piece and enter its Day / Week / Month re-rent <b>cost</b> and quantity. The
+      <b>Charge to Customer</b> list below shows the customer charge for each rate period, calculated from your
+      Target Margin %, and totals the amount billed per period. The pricing area turns
+      <span class="margin-bad"><b>red</b></span> when the margin is below 30% — anything below 30% margin must be approved by
+      DSM or DM. Everything autosaves in this browser.
+    </p>
+  </main>
+</div>
+<footer><b>Email Request</b> generates the PDF and opens an email draft with the subject pre-filled — attach the PDF before sending. <b>Download PDF</b> saves the request as a PDF. <b>Clear Form</b> starts a new request.<br>On iPhone/iPad the PDF opens in a new tab — tap the <b>Share</b> icon to save it to Files or attach it to an email.</footer>
+
+<script>
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered successfully.'))
+      .catch(err => console.log('Service Worker registration failed: ', err));
+  });
+}
+
+const $ = id => document.getElementById(id);
+const money = v => v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+const MW_TARGET = 30;   // Midwest District target margin %; below this needs DSM/DM approval
+const round2 = n => Math.round(n * 100) / 100;
+
+// ---- Equipment line items ----
+function makeRow(it) {
+  it = it || {};
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input class="it-cc" placeholder="e.g. 310-0030"></td>' +
+    '<td><input class="it-desc" placeholder="Equipment description"></td>' +
+    '<td class="mid"><input class="it-qty" type="number" min="1" step="1" value="1" inputmode="numeric"></td>' +
+    '<td class="num"><input class="it-cost-d" type="number" min="0" step="0.01" inputmode="decimal"></td>' +
+    '<td class="num"><input class="it-cost-w" type="number" min="0" step="0.01" inputmode="decimal"></td>' +
+    '<td class="num"><input class="it-cost-m" type="number" min="0" step="0.01" inputmode="decimal"></td>' +
+    '<td class="mid"><button type="button" class="row-x" title="Remove">\u00d7</button></td>';
+  tr.querySelector('.it-cc').value = it.cc || '';
+  tr.querySelector('.it-desc').value = it.desc || '';
+  tr.querySelector('.it-qty').value = (it.qty != null && it.qty !== '') ? it.qty : '1';
+  tr.querySelector('.it-cost-d').value = it.cd || '';
+  tr.querySelector('.it-cost-w').value = it.cw || '';
+  tr.querySelector('.it-cost-m').value = it.cm || '';
+  return tr;
+}
+function readItems() {
+  const crows = [...document.querySelectorAll('#customRows tr')];
+  return [...document.querySelectorAll('#itemsBody tr')].map((tr, i) => {
+    const cr = crows[i];
+    return {
+      cc: tr.querySelector('.it-cc').value,
+      desc: tr.querySelector('.it-desc').value,
+      qty: tr.querySelector('.it-qty').value,
+      cd: tr.querySelector('.it-cost-d').value,
+      cw: tr.querySelector('.it-cost-w').value,
+      cm: tr.querySelector('.it-cost-m').value,
+      xd: cr ? cr.querySelector('.cust-d').value : '',
+      xw: cr ? cr.querySelector('.cust-w').value : '',
+      xm: cr ? cr.querySelector('.cust-m').value : '',
+    };
+  });
+}
+function makeCustomRow(it) {
+  it = it || {};
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td class="cust-label"></td>' +
+    '<td class="mid cust-qty">—</td>' +
+    '<td class="num"><input class="cust-d" type="number" min="0" step="0.01" inputmode="decimal"></td>' +
+    '<td class="num"><input class="cust-w" type="number" min="0" step="0.01" inputmode="decimal"></td>' +
+    '<td class="num"><input class="cust-m" type="number" min="0" step="0.01" inputmode="decimal"></td>';
+  tr.querySelector('.cust-d').value = it.xd || '';
+  tr.querySelector('.cust-w').value = it.xw || '';
+  tr.querySelector('.cust-m').value = it.xm || '';
+  return tr;
+}
+function setItems(items) {
+  const body = $('itemsBody'), cbody = $('customRows');
+  body.innerHTML = ''; cbody.innerHTML = '';
+  if (!items || !items.length) items = [{}];
+  items.forEach(it => { body.appendChild(makeRow(it)); cbody.appendChild(makeCustomRow(it)); });
+}
+function addItem() {
+  $('itemsBody').appendChild(makeRow({}));
+  $('customRows').appendChild(makeCustomRow({}));
+  calc();
+}
+function removeItemRow(tr) {
+  const rows = [...document.querySelectorAll('#itemsBody tr')];
+  const crows = [...document.querySelectorAll('#customRows tr')];
+  const idx = rows.indexOf(tr);
+  if (rows.length > 1) {
+    tr.remove();
+    if (crows[idx]) crows[idx].remove();
+  } else {
+    tr.querySelectorAll('input').forEach(i => { i.value = i.classList.contains('it-qty') ? '1' : ''; });
+    if (crows[idx]) crows[idx].querySelectorAll('input').forEach(i => i.value = '');
+  }
+  calc();
+}
+
+function targetTier() {
+  const tval = $('target').value.trim();
+  if (tval === '') return 'none';
+  return (parseFloat(tval) || 0) < MW_TARGET ? 'red' : 'green';
+}
+
+function calc() {
+  const target = (parseFloat($('target').value) || 0) / 100;
+  const tier = targetTier();
+  const cls = { red: 'margin-bad', yellow: 'margin-warn', green: 'margin-good', none: '' }[tier];
+  const markup = c => (c > 0 && target < 1) ? round2(c / (1 - target)) : 0;
+  const cell = val => val > 0 ? money(val) : '—';
+
+  const mb = $('markupBody');
+  mb.innerHTML = '';
+  let totD = 0, totW = 0, totM = 0, costD = 0, costW = 0, costM = 0, any = false;
+
+  document.querySelectorAll('#itemsBody tr').forEach((tr, idx) => {
+    const cc = tr.querySelector('.it-cc').value.trim();
+    const desc = tr.querySelector('.it-desc').value.trim();
+    const qty = parseFloat(tr.querySelector('.it-qty').value) || 0;
+    const cd = parseFloat(tr.querySelector('.it-cost-d').value) || 0;
+    const cw = parseFloat(tr.querySelector('.it-cost-w').value) || 0;
+    const cm = parseFloat(tr.querySelector('.it-cost-m').value) || 0;
+    if (!cc && !desc && cd <= 0 && cw <= 0 && cm <= 0) return;
+
+    any = true;
+    const chD = markup(cd), chW = markup(cw), chM = markup(cm);
+    totD += chD * qty; totW += chW * qty; totM += chM * qty;
+    costD += cd * qty; costW += cw * qty; costM += cm * qty;
+
+    const label = [cc, desc].filter(Boolean).join(' — ') || ('Item ' + (idx + 1));
+    const row = document.createElement('tr');
+    row.innerHTML =
+      '<td>' + escapeHtml(label) + '</td>' +
+      '<td class="mid">' + (qty || '—') + '</td>' +
+      '<td class="num mu ' + cls + '">' + cell(chD) + '</td>' +
+      '<td class="num mu ' + cls + '">' + cell(chW) + '</td>' +
+      '<td class="num mu ' + cls + '">' + cell(chM) + '</td>';
+    mb.appendChild(row);
+  });
+
+  if (!any) {
+    mb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;">Add equipment above to see the charge to the customer.</td></tr>';
+  }
+
+  $('totD').textContent = money(totD);
+  $('totW').textContent = money(totW);
+  $('totM').textContent = money(totM);
+  $('proD').textContent = money(totD - costD);
+  $('proW').textContent = money(totW - costW);
+  $('proM').textContent = money(totM - costM);
+  ['totD', 'totW', 'totM', 'proD', 'proW', 'proM'].forEach(id => $(id).className = 'num ' + cls);
+
+  // ---- Custom charge section ----
+  const erows = [...document.querySelectorAll('#itemsBody tr')];
+  const crows = [...document.querySelectorAll('#customRows tr')];
+  const floor = MW_TARGET / 100;
+  let cTotD = 0, cTotW = 0, cTotM = 0, cCostD = 0, cCostW = 0, cCostM = 0, custWarn = false;
+
+  erows.forEach((er, i) => {
+    const cr = crows[i];
+    if (!cr) return;
+    const cc2 = er.querySelector('.it-cc').value.trim();
+    const desc = er.querySelector('.it-desc').value.trim();
+    const qty = parseFloat(er.querySelector('.it-qty').value) || 0;
+    cr.querySelector('.cust-label').textContent = [cc2, desc].filter(Boolean).join(' — ') || ('Item ' + (i + 1));
+    cr.querySelector('.cust-qty').textContent = qty || '—';
+
+    [['cust-d', 'it-cost-d'], ['cust-w', 'it-cost-w'], ['cust-m', 'it-cost-m']].forEach(([xCls, kCls]) => {
+      const input = cr.querySelector('.' + xCls);
+      const charge = parseFloat(input.value) || 0;
+      const cost = parseFloat(er.querySelector('.' + kCls).value) || 0;
+      const under = charge > 0 && ((charge - cost) / charge) < floor;
+      input.classList.toggle('under', under);
+      if (under) custWarn = true;
+    });
+
+    const xd = parseFloat(cr.querySelector('.cust-d').value) || 0;
+    const xw = parseFloat(cr.querySelector('.cust-w').value) || 0;
+    const xm = parseFloat(cr.querySelector('.cust-m').value) || 0;
+    cTotD += xd * qty; cTotW += xw * qty; cTotM += xm * qty;
+    cCostD += (parseFloat(er.querySelector('.it-cost-d').value) || 0) * qty;
+    cCostW += (parseFloat(er.querySelector('.it-cost-w').value) || 0) * qty;
+    cCostM += (parseFloat(er.querySelector('.it-cost-m').value) || 0) * qty;
+  });
+
+  [['D', cTotD, cCostD], ['W', cTotW, cCostW], ['M', cTotM, cCostM]].forEach(([p, charge, cost]) => {
+    const totCell = $('cTot' + p), marCell = $('cMar' + p), proCell = $('cPro' + p);
+    totCell.textContent = money(charge);
+    if (charge > 0) {
+      const margin = (charge - cost) / charge;
+      const c2 = margin < floor ? 'margin-bad' : 'margin-good';
+      marCell.textContent = (margin * 100).toFixed(1) + '%';
+      marCell.className = 'num ' + c2;
+      proCell.textContent = money(charge - cost);
+      proCell.className = 'num ' + c2;
+      totCell.className = 'num ' + c2;
+    } else {
+      marCell.textContent = '—'; marCell.className = 'num';
+      proCell.textContent = money(0); proCell.className = 'num';
+      totCell.className = 'num';
+    }
+  });
+  const cAppr = $('customApproval');
+  if (custWarn) {
+    cAppr.className = 'approval';
+    cAppr.innerHTML = `<b>DSM or DM approval required:</b> one or more pieces have a custom margin below ${MW_TARGET}% ` +
+      `(highlighted in red). Every piece must be at ${MW_TARGET}% margin or above, or be approved by DSM or DM.`;
+  } else {
+    cAppr.className = 'approval none'; cAppr.innerHTML = '';
+  }
+
+  const tval = $('target').value.trim();
+  updateStatus(tval !== '', parseFloat(tval) || 0);
+  document.querySelectorAll('.field-error').forEach(el => { if (el.value.trim()) el.classList.remove('field-error'); });
+  save();
+}
+
+function updateStatus(hasTarget, targetPct) {
+  const el = $('approval');
+  const wraps = document.querySelectorAll('.table-wrap');
+  const tin = $('target');
+
+  el.className = 'approval none'; el.innerHTML = '';
+  wraps.forEach(tw => tw.classList.remove('approval-mode'));
+  tin.classList.remove('target-warn');
+
+  if (hasTarget && targetPct < MW_TARGET) {
+    el.className = 'approval';
+    el.innerHTML = `<b>DSM or DM approval required:</b> the margin is set to ${targetPct}%, below the ` +
+      `${MW_TARGET}% Midwest District target margin. Anything below ${MW_TARGET}% margin must be approved by DSM or DM.`;
+    wraps.forEach(tw => tw.classList.add('approval-mode'));
+    tin.classList.add('target-warn');
+  }
+}
+
+function setCustomOpen(open) {
+  $('customBody').classList.toggle('none', !open);
+  $('customToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+  $('customToggle').querySelector('.caret').innerHTML = open ? '&#9662;' : '&#9656;';
+}
+function toggleCustom() {
+  setCustomOpen($('customBody').classList.contains('none'));
+  save();
+}
+
+const KEY = 'rerent-request-form';
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function save() {
+  const data = {};
+  document.querySelectorAll('[data-save]').forEach(el => data[el.id] = el.value);
+  data._items = readItems();
+  data._customOpen = !$('customBody').classList.contains('none');
+  lsSet(KEY, JSON.stringify(data));
+}
+function load() {
+  let data = {};
+  try { data = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  for (const [id, val] of Object.entries(data)) if (id !== '_items' && id !== '_customOpen' && $(id)) $(id).value = val;
+  setItems(Array.isArray(data._items) ? data._items : []);
+  const customOpen = data._customOpen || [...document.querySelectorAll('#customRows tr')].some(cr =>
+    ['.cust-d', '.cust-w', '.cust-m'].some(s => ((cr.querySelector(s) || {}).value || '').trim() !== ''));
+  setCustomOpen(customOpen);
+  loadProfile();
+}
+function resetForm() {
+  if (!confirm('Start a new request? Your branch, OSR, and saved vendors are kept.')) return;
+  localStorage.removeItem(KEY);
+  document.querySelectorAll('[data-save]').forEach(el => el.value = '');
+  $('target').value = 30;
+  setItems([]);            
+  setCustomOpen(false);    
+  loadProfile();           
+  autoGrow($('reason'));
+  calc();
+}
+
+// ---- Sticky identity ----
+const PKEY = 'rerent-profile';
+function saveProfile() {
+  lsSet(PKEY, JSON.stringify({ branch: $('branch').value, osr: $('osr').value }));
+}
+function loadProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem(PKEY) || '{}');
+    if (p.branch && !$('branch').value.trim()) $('branch').value = p.branch;
+    if (p.osr && !$('osr').value.trim()) $('osr').value = p.osr;
+  } catch (e) {}
+}
+
+// ---- Saved vendor list ----
+const VKEY = 'rerent-vendors';
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function getVendors() {
+  try { const a = JSON.parse(localStorage.getItem(VKEY) || '[]'); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function setVendors(arr) { lsSet(VKEY, JSON.stringify(arr)); }
+function renderVendorDrop(filter) {
+  const arr = getVendors();
+  const drop = $('vendorDrop');
+  const f = (filter || '').trim().toLowerCase();
+  if (!arr.length) {
+    drop.innerHTML = '<div class="vendor-drop-empty">No saved vendors yet — type one and click Save.</div>';
+    return;
+  }
+  const items = arr.filter(v => !f || v.toLowerCase().includes(f));
+  if (!items.length) {
+    drop.innerHTML = '<div class="vendor-drop-empty">No match — click Save to add it.</div>';
+    return;
+  }
+  drop.innerHTML = items.map(v => {
+    const i = arr.indexOf(v);
+    return `<div class="vendor-opt"><button type="button" class="v-name" data-i="${i}">${escapeHtml(v)}</button>` +
+           `<button type="button" class="v-x" data-i="${i}" title="Remove ${escapeHtml(v)}">\u00d7</button></div>`;
+  }).join('');
+}
+function openVendorDrop() { renderVendorDrop($('vendor').value); $('vendorDrop').classList.remove('none'); }
+function closeVendorDrop() { $('vendorDrop').classList.add('none'); }
+function addCurrentVendor() {
+  const name = $('vendor').value.trim();
+  if (!name) { $('vendor').focus(); return; }
+  const arr = getVendors();
+  if (!arr.some(v => v.toLowerCase() === name.toLowerCase())) {
+    arr.push(name);
+    arr.sort((a, b) => a.localeCompare(b));
+    setVendors(arr);
+  }
+  openVendorDrop();
+}
+function removeVendor(i) {
+  const arr = getVendors();
+  arr.splice(i, 1);
+  setVendors(arr);
+  renderVendorDrop($('vendor').value);
+}
+
+// ---- Email with PDF ----
+function subjectLine() {
+  const osr = $('osr').value.trim() || 'OSR';
+  const vendor = $('vendor').value.trim() || 'Vendor';
+  return `Rerent Form - ${osr} - ${vendor}`;
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('offline'));
+    document.head.appendChild(s);
+  });
+}
+
+async function loadPdfLibs() {
+  if (!(window.jspdf && window.jspdf.jsPDF)) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  if (typeof window.jspdf.jsPDF.API.autoTable !== 'function') {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+  }
+}
+
+const BRAND = [0, 176, 240];        
+const INK = [33, 37, 41];
+const MUTED = [110, 110, 110];
+const REDINK = [176, 32, 32];
+
+function isIOS() {
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function deliverPdf(doc, filename, win) {
+  const url = URL.createObjectURL(doc.output('blob'));
+  if (isIOS()) {
+    if (win && !win.closed) { try { win.location.href = url; } catch (e) { window.open(url, '_blank'); } }
+    else { window.open(url, '_blank'); }
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (filename || 'Re-Rent Request') + '.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+async function downloadPdf(filename, win) {
+  await loadPdfLibs();
+  const JsPdf = window.jspdf.jsPDF;
+  const doc = new JsPdf({ unit: 'mm', format: 'letter', orientation: 'portrait' });
+
+  const val = id => $(id).value.trim();
+  const target = (parseFloat($('target').value) || 0) / 100;
+  const tval = $('target').value.trim();
+  const targetPct = parseFloat(tval) || 0;
+  const hasTarget = tval !== '';
+  const markup = c => (c > 0 && target < 1) ? round2(c / (1 - target)) : 0;
+  const mny = c => c > 0 ? money(c) : '–';
+
+  const erows = [...document.querySelectorAll('#itemsBody tr')];
+  const crows = [...document.querySelectorAll('#customRows tr')];
+  let anyCustom = false;
+  crows.forEach(cr => ['cust-d', 'cust-w', 'cust-m'].forEach(c => {
+    if ((parseFloat(cr.querySelector('.' + c).value) || 0) > 0) anyCustom = true;
+  }));
+
+  const items = [];
+  let totD = 0, totW = 0, totM = 0, costD = 0, costW = 0, costM = 0, xTotD = 0, xTotW = 0, xTotM = 0, customBelow = false;
+  erows.forEach((tr, i) => {
+    const cc = tr.querySelector('.it-cc').value.trim();
+    const desc = tr.querySelector('.it-desc').value.trim();
+    const qty = parseFloat(tr.querySelector('.it-qty').value) || 0;
+    const cd = parseFloat(tr.querySelector('.it-cost-d').value) || 0;
+    const cw = parseFloat(tr.querySelector('.it-cost-w').value) || 0;
+    const cm = parseFloat(tr.querySelector('.it-cost-m').value) || 0;
+    if (!cc && !desc && cd <= 0 && cw <= 0 && cm <= 0) return;
+    const cr = crows[i];
+    const xd = cr ? (parseFloat(cr.querySelector('.cust-d').value) || 0) : 0;
+    const xw = cr ? (parseFloat(cr.querySelector('.cust-w').value) || 0) : 0;
+    const xm = cr ? (parseFloat(cr.querySelector('.cust-m').value) || 0) : 0;
+    [[xd, cd], [xw, cw], [xm, cm]].forEach(([ch, co]) => { if (ch > 0 && ((ch - co) / ch * 100) < MW_TARGET) customBelow = true; });
+    totD += markup(cd) * qty; totW += markup(cw) * qty; totM += markup(cm) * qty;
+    costD += cd * qty; costW += cw * qty; costM += cm * qty;
+    xTotD += xd * qty; xTotW += xw * qty; xTotM += xm * qty;
+    items.push({ qty, cc, desc, cd, cw, cm, chD: markup(cd), chW: markup(cw), chM: markup(cm), xd, xw, xm });
+  });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 12;
+  const contentW = pageW - margin * 2;
+
+  doc.setFillColor(...BRAND);
+  doc.rect(0, 0, pageW, 15, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(15);
+  doc.text('Midwest District Re-Rent Request', margin, 9.8);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+  doc.text(fmtDate(new Date().toISOString().slice(0, 10)), pageW - margin, 9.5, { align: 'right' });
+  doc.setTextColor(...INK);
+
+  const left = [
+    ['Branch', val('branch') || '–'],
+    ['OSR', val('osr') || '–'],
+    ['Customer', val('customer') || '–'],
+    ['Account', val('account') || '–'],
+    ['Start Date', fmtDate($('startdate').value)],
+  ];
+  const right = [
+    ['Length', val('length') || '–'],
+    ['Vendor', val('vendor') || '–'],
+    ['District Avail.', val('distavail') || '–'],
+    ['Region Avail.', val('regavail') || '–'],
+    ['Target Margin', hasTarget ? targetPct + '%' : '–'],
+  ];
+  const detailRows = [];
+  for (let i = 0; i < Math.max(left.length, right.length); i++) {
+    const l = left[i] || ['', ''], r = right[i] || ['', ''];
+    detailRows.push([l[0], l[1], r[0], r[1]]);
+  }
+  doc.autoTable({
+    startY: 20,
+    body: detailRows,
+    theme: 'plain',
+    styles: { fontSize: 9, cellPadding: { top: 0.7, bottom: 0.7, left: 0, right: 2 } },
+    columnStyles: {
+      0: { fontStyle: 'bold', textColor: MUTED, cellWidth: 28 },
+      1: { cellWidth: (contentW - 28 - 32) / 2 },
+      2: { fontStyle: 'bold', textColor: MUTED, cellWidth: 32 },
+      3: { cellWidth: 'auto' },
+    },
+    margin: { left: margin, right: margin },
+  });
+
+  let y = doc.lastAutoTable.finalY + 5;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...INK);
+  doc.text(anyCustom ? 'Equipment — Re-Rent Cost & Custom Charge (each)'
+                     : 'Equipment — Re-Rent Cost & Charge to Customer (each)', margin, y);
+
+  const lastThree = anyCustom ? ['Custom/Day', 'Custom/Wk', 'Custom/Mo'] : ['Charge/Day', 'Charge/Wk', 'Charge/Mo'];
+  const head = [['Qty', 'Cat Class', 'Description', 'Cost/Day', 'Cost/Wk', 'Cost/Mo', ...lastThree]];
+  const body = items.map(it => [
+    it.qty ? String(it.qty) : '',
+    it.cc || '', it.desc || '',
+    mny(it.cd), mny(it.cw), mny(it.cm),
+    anyCustom ? mny(it.xd) : mny(it.chD),
+    anyCustom ? mny(it.xw) : mny(it.chW),
+    anyCustom ? mny(it.xm) : mny(it.chM),
+  ]);
+  if (!body.length) body.push(['', '', '(no equipment entered)', '', '', '', '', '', '']);
+
+  const numW = 16.5;
+  doc.autoTable({
+    startY: y + 2,
+    head, body,
+    theme: 'striped',
+    headStyles: { fillColor: BRAND, textColor: [255, 255, 255], fontSize: 7.5, halign: 'center', fontStyle: 'bold' },
+    bodyStyles: { fontSize: 8, cellPadding: { top: 1.4, bottom: 1.4, left: 2, right: 2 } },
+    alternateRowStyles: { fillColor: [243, 248, 251] },
+    styles: { overflow: 'linebreak', lineColor: [222, 226, 230], lineWidth: 0.1 },
+    columnStyles: {
+      0: { cellWidth: 9, halign: 'center' },
+      1: { cellWidth: 21 },
+      2: { cellWidth: contentW - 9 - 21 - numW * 6 },
+      3: { cellWidth: numW, halign: 'right' },
+      4: { cellWidth: numW, halign: 'right' },
+      5: { cellWidth: numW, halign: 'right' },
+      6: { cellWidth: numW, halign: 'right' },
+      7: { cellWidth: numW, halign: 'right' },
+      8: { cellWidth: numW, halign: 'right' },
+    },
+    margin: { left: margin, right: margin, bottom: 16 },
+  });
+
+  y = doc.lastAutoTable.finalY + 6;
+  const ensure = need => { if (y + need > pageH - margin) { doc.addPage(); y = margin + 4; } };
+  const periodLine = (label, parts) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.text(label, margin, y); y += 4.6;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+    doc.text(parts, margin + 2, y); y += 6;
+  };
+
+  if (anyCustom) {
+    const rows = [['Day', xTotD, costD], ['Week', xTotW, costW], ['Month', xTotM, costM]].filter(r => r[1] > 0);
+    ensure(8 + rows.length * 5);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.text('Custom Charge to Customer  (× qty)', margin, y); y += 5;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    rows.forEach(([n, ch, co]) => {
+      const mar = (ch - co) / ch * 100;
+      doc.text(`${n}:`, margin + 2, y);
+      doc.text(`Charge ${money(ch)}     Cost ${money(co)}     Profit ${money(ch - co)}     Margin ${mar.toFixed(1)}%`, margin + 18, y);
+      y += 5;
+    });
+  } else {
+    ensure(24);
+    periodLine('Total Charge to Customer  (× qty)', `Day ${money(totD)}        Week ${money(totW)}        Month ${money(totM)}`);
+    periodLine('United Rentals Profit  (× qty, vs vendor cost)', `Day ${money(totD - costD)}        Week ${money(totW - costW)}        Month ${money(totM - costM)}`);
+  }
+
+  const reason = $('reason').value.trim() || '–';
+  ensure(12);
+  y += 1;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.text('Reason for Re-Rent', margin, y); y += 5;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+  doc.splitTextToSize(reason, contentW - 2).forEach(line => { ensure(5); doc.text(line, margin + 2, y); y += 4.8; });
+
+  const reasons = [];
+  if (hasTarget && targetPct < MW_TARGET) reasons.push(`target margin is ${targetPct}%`);
+  if (customBelow) reasons.push(`a piece's custom margin is below ${MW_TARGET}%`);
+  if (reasons.length) {
+    const txt = `APPROVAL REQUIRED — DSM or DM:  ${reasons.join('; ')} (below the ${MW_TARGET}% MW District target margin).`;
+    const lines = doc.splitTextToSize(txt, contentW - 6);
+    const bh = lines.length * 4.6 + 5;
+    ensure(bh + 3);
+    y += 2;
+    doc.setFillColor(253, 232, 232); doc.setDrawColor(...REDINK); doc.setLineWidth(0.3);
+    doc.rect(margin, y - 3.5, contentW, bh, 'FD');
+    doc.setTextColor(...REDINK); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+    let yy = y;
+    lines.forEach(l => { doc.text(l, margin + 3, yy); yy += 4.6; });
+    doc.setTextColor(...INK);
+    y += bh;
+  }
+
+  const pages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(150, 150, 150);
+    doc.text('United Rentals — Re-Rent Request', margin, pageH - 6);
+    doc.text(`Page ${p} of ${pages}`, pageW - margin, pageH - 6, { align: 'right' });
+    doc.setTextColor(...INK);
+  }
+
+  deliverPdf(doc, filename, win);
+}
+
+function savePdf() {
+  const win = isIOS() ? window.open('', '_blank') : null;
+  downloadPdf(subjectLine(), win).catch(() => {
+    if (win && !win.closed) win.close();
+    alert('Could not generate the PDF. The PDF library needs an internet connection the first time it runs — please connect and try again.');
+  });
+}
+
+function fmtDate(iso) {
+  if (!iso) return '-';
+  const m = iso.split('-');
+  if (m.length !== 3) return iso;
+  const d = new Date(+m[0], +m[1] - 1, +m[2]);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function openDraft(subject) {
+  const v = id => $(id).value.trim() || '-';
+  const target = (parseFloat($('target').value) || 0) / 100;
+  const tval = $('target').value.trim();
+  const targetPct = parseFloat(tval) || 0;
+  const hasTarget = tval !== '';
+  const markup = c => (c > 0 && target < 1) ? round2(c / (1 - target)) : 0;
+  const fmt = c => c > 0 ? money(c) : '-';
+
+  const erows = [...document.querySelectorAll('#itemsBody tr')];
+  const crows = [...document.querySelectorAll('#customRows tr')];
+
+  let anyCustom = false;
+  crows.forEach(cr => ['cust-d', 'cust-w', 'cust-m'].forEach(c => {
+    if ((parseFloat(cr.querySelector('.' + c).value) || 0) > 0) anyCustom = true;
+  }));
+
+  let totD = 0, totW = 0, totM = 0, costD = 0, costW = 0, costM = 0;
+  const itemLines = [];
+  erows.forEach((tr, idx) => {
+    const cc = tr.querySelector('.it-cc').value.trim();
+    const desc = tr.querySelector('.it-desc').value.trim();
+    const qty = parseFloat(tr.querySelector('.it-qty').value) || 0;
+    const cd = parseFloat(tr.querySelector('.it-cost-d').value) || 0;
+    const cw = parseFloat(tr.querySelector('.it-cost-w').value) || 0;
+    const cm = parseFloat(tr.querySelector('.it-cost-m').value) || 0;
+    if (!cc && !desc && cd <= 0 && cw <= 0 && cm <= 0) return;
+    const chD = markup(cd), chW = markup(cw), chM = markup(cm);
+    totD += chD * qty; totW += chW * qty; totM += chM * qty;
+    costD += cd * qty; costW += cw * qty; costM += cm * qty;
+    const label = [cc, desc].filter(Boolean).join(' - ') || ('Item ' + (idx + 1));
+    itemLines.push(`  ${qty} x ${label}`);
+    itemLines.push(`      Cost     Day ${fmt(cd)}   Week ${fmt(cw)}   Month ${fmt(cm)}`);
+    if (!anyCustom) itemLines.push(`      Charge   Day ${fmt(chD)}   Week ${fmt(chW)}   Month ${fmt(chM)}`);
+    itemLines.push('');
+  });
+  if (itemLines.length && itemLines[itemLines.length - 1] === '') itemLines.pop();
+  const itemsBlock = itemLines.length ? itemLines.join('\n') : '  (none entered)';
+
+  let xTotD = 0, xTotW = 0, xTotM = 0, customBelow = false;
+  erows.forEach((er, i) => {
+    const cr = crows[i]; if (!cr) return;
+    const qty = parseFloat(er.querySelector('.it-qty').value) || 0;
+    [['cust-d', 'it-cost-d'], ['cust-w', 'it-cost-w'], ['cust-m', 'it-cost-m']].forEach(([xCls, kCls]) => {
+      const charge = parseFloat(cr.querySelector('.' + xCls).value) || 0;
+      const cost = parseFloat(er.querySelector('.' + kCls).value) || 0;
+      if (charge > 0 && ((charge - cost) / charge * 100) < MW_TARGET) customBelow = true;
+    });
+    xTotD += (parseFloat(cr.querySelector('.cust-d').value) || 0) * qty;
+    xTotW += (parseFloat(cr.querySelector('.cust-w').value) || 0) * qty;
+    xTotM += (parseFloat(cr.querySelector('.cust-m').value) || 0) * qty;
+  });
+
+  let chargeSection;
+  if (anyCustom) {
+    const cl = [];
+    [['Day  ', xTotD, costD], ['Week ', xTotW, costW], ['Month', xTotM, costM]].forEach(([name, charge, cost]) => {
+      if (charge > 0) {
+        const margin = (charge - cost) / charge * 100;
+        cl.push(`  ${name}   charge ${money(charge)}   cost ${money(cost)}   profit ${money(charge - cost)}   (margin ${margin.toFixed(1)}%)`);
+      }
+    });
+    chargeSection = `CUSTOM CHARGE TO CUSTOMER  (manual, x qty)\n${cl.join('\n')}`;
+  } else {
+    chargeSection = `TOTAL CHARGE TO CUSTOMER  (x qty)\n  Day:    ${money(totD)}\n  Week:   ${money(totW)}\n  Month:  ${money(totM)}\n\nUNITED RENTALS PROFIT  (x qty, vs vendor cost)\n  Day:    ${money(totD - costD)}\n  Week:   ${money(totW - costW)}\n  Month:  ${money(totM - costM)}`;
+  }
+
+  const reasons = [];
+  if (hasTarget && targetPct < MW_TARGET) reasons.push(`target margin is ${targetPct}%`);
+  if (customBelow) reasons.push(`a piece's custom margin is below ${MW_TARGET}%`);
+  const approvalBlock = reasons.length
+    ? `\n----------------------------------------\n** APPROVAL REQUIRED — DSM or DM **\n${reasons.join('; ')} (below the ${MW_TARGET}% Midwest District target margin).\n`
+    : '';
+
+  const reasonText = ($('reason').value.trim() || '-').replace(/\n/g, '\n  ');
+  const equipHeader = anyCustom ? 'EQUIPMENT  (re-rent cost, each)' : 'EQUIPMENT  (re-rent cost & charge to customer, each)';
+
+  const body = `RE-RENT REQUEST — please review & approve\n========================================\n\nREQUEST DETAILS\n  Branch:         ${v('branch')}\n  OSR:            ${v('osr')}\n  Customer:       ${v('customer')}   (Acct ${v('account')})\n  Start Date:     ${fmtDate($('startdate').value)}\n  Length:         ${v('length')}\n  Vendor:         ${v('vendor')}\n  Target Margin:  ${hasTarget ? targetPct + '%' : '-'}\n\n${equipHeader}\n${itemsBlock}\n\n${chargeSection}\n\nREASON FOR RE-RENT\n  ${reasonText}\n${approvalBlock}----------------------------------------\nAttach the downloaded PDF "${subject}.pdf" before sending.`;
+  location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+function validate() {
+  const required = { branch: 'Branch Name', osr: 'OSR', customer: 'Customer Name', vendor: 'Re-Rent Vendor' };
+  const missing = [];
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+  for (const [id, label] of Object.entries(required)) {
+    if (!$(id).value.trim()) { missing.push(label); $(id).classList.add('field-error'); }
+  }
+  const hasItem = [...document.querySelectorAll('#itemsBody tr')].some(tr =>
+    ['.it-cost-d', '.it-cost-w', '.it-cost-m'].some(sel => (parseFloat(tr.querySelector(sel).value) || 0) > 0));
+  if (!hasItem) missing.push('at least one piece of equipment with a re-rent cost');
+  return missing;
+}
+
+async function emailRequest() {
+  const missing = validate();
+  if (missing.length) {
+    const proceed = confirm('This request is missing:\n\n  \u2022 ' + missing.join('\n  \u2022 ') + '\n\nSend it anyway?');
+    if (!proceed) {
+      const firstBad = document.querySelector('.field-error');
+      if (firstBad) firstBad.focus();
+      return;
+    }
+  }
+  const subject = subjectLine();
+  const win = isIOS() ? window.open('', '_blank') : null;
+  try {
+    await downloadPdf(subject, win);
+  } catch (e) {
+    if (win && !win.closed) win.close();
+    alert('Could not generate the PDF automatically (no internet for the PDF library). The print dialog will open instead — choose "Save as PDF", then attach it to the email draft.');
+    window.print();
+  }
+  openDraft(subject);
+}
+
+function autoGrow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+$('reason').addEventListener('input', () => autoGrow($('reason')));
+
+document.querySelector('main').addEventListener('input', calc);
+['branch', 'osr'].forEach(id => $(id).addEventListener('input', saveProfile));
+$('itemsBody').addEventListener('click', e => {
+  if (e.target.classList.contains('row-x')) removeItemRow(e.target.closest('tr'));
+});
+
+$('vendor').addEventListener('focus', openVendorDrop);
+$('vendor').addEventListener('input', openVendorDrop);
+$('vendorDrop').addEventListener('mousedown', e => {
+  const i = e.target.getAttribute('data-i');
+  if (i === null) return;
+  e.preventDefault();
+  if (e.target.classList.contains('v-x')) {
+    removeVendor(+i);
+  } else if (e.target.classList.contains('v-name')) {
+    $('vendor').value = getVendors()[+i] || '';
+    closeVendorDrop();
+    calc();
+  }
+});
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest('.vendor-field')) closeVendorDrop();
+});
+
+load();
+autoGrow($('reason'));
+calc();
+</script>
+</body>
+</html>
